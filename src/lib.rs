@@ -1,7 +1,6 @@
-
-use yahoo_finance_api as yahoo;
-use chrono::{LocalResult, Utc, TimeZone};
+use chrono::{LocalResult, TimeZone, Utc};
 use std::error::Error;
+use yahoo_finance_api as yahoo;
 
 pub struct StockAnalysis {
     pub min_price: f64,
@@ -35,30 +34,38 @@ impl StockMonitor {
         };
 
         for quote in quotes {
-            let date_opt = Utc.timestamp_opt(quote.timestamp as i64, 0);
-            if let LocalResult::Single(date) = date_opt {
+            if let LocalResult::Single(date) = Utc.timestamp_opt(quote.timestamp as i64, 0) {
                 let formatted_date = date.format("%Y-%m-%d").to_string();
-                let volatility = (quote.high - quote.low) / quote.low > 0.02;
+                analysis
+                    .chart_data
+                    .push((formatted_date.clone(), quote.close));
 
+                let volatility = calculate_volatility(quote.high, quote.low);
                 if volatility {
                     analysis.volatile_days.push(formatted_date.clone());
                 }
 
-                analysis.chart_data.push((formatted_date.clone(), quote.close));
-
-                if quote.close < analysis.min_price {
-                    analysis.min_price = quote.close;
-                    analysis.min_date = formatted_date.clone();
-                }
-                if quote.close > analysis.max_price {
-                    analysis.max_price = quote.close;
-                    analysis.max_date = formatted_date;
-                }
+                update_min_max_prices(&mut analysis, quote.close, &formatted_date);
             } else {
                 eprintln!("Invalid timestamp for quote");
             }
         }
 
         Ok(analysis)
+    }
+}
+
+fn calculate_volatility(high: f64, low: f64) -> bool {
+    (high - low) / low > 0.02
+}
+
+fn update_min_max_prices(analysis: &mut StockAnalysis, price: f64, date: &str) {
+    if price < analysis.min_price {
+        analysis.min_price = price;
+        analysis.min_date = date.to_string();
+    }
+    if price > analysis.max_price {
+        analysis.max_price = price;
+        analysis.max_date = date.to_string();
     }
 }
