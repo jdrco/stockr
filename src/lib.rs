@@ -2,13 +2,23 @@ use chrono::{LocalResult, TimeZone, Utc};
 use std::error::Error;
 use yahoo_finance_api as yahoo;
 
+pub struct DailyQuote {
+    pub date: String,
+    pub open: f64,
+    pub high: f64,
+    pub low: f64,
+    pub volume: u64,
+    pub close: f64,
+    pub adjclose: f64,
+    pub is_volatile: bool,
+}
+
 pub struct StockAnalysis {
     pub min_price: f64,
     pub max_price: f64,
     pub min_date: String,
     pub max_date: String,
-    pub chart_data: Vec<(String, f64)>,
-    pub volatile_days: Vec<String>,
+    pub quotes: Vec<DailyQuote>,
 }
 
 pub struct StockMonitor {
@@ -29,21 +39,25 @@ impl StockMonitor {
             max_price: std::f64::MIN,
             min_date: String::new(),
             max_date: String::new(),
-            chart_data: Vec::new(),
-            volatile_days: Vec::new(),
+            quotes: Vec::new(),
         };
 
         for quote in quotes {
             if let LocalResult::Single(date) = Utc.timestamp_opt(quote.timestamp as i64, 0) {
                 let formatted_date = date.format("%Y-%m-%d").to_string();
-                analysis
-                    .chart_data
-                    .push((formatted_date.clone(), quote.close));
+                let volatility = determine_volatility(quote.high, quote.low);
 
-                let volatility = calculate_volatility(quote.high, quote.low);
-                if volatility {
-                    analysis.volatile_days.push(formatted_date.clone());
-                }
+                let daily_quote = DailyQuote {
+                    date: formatted_date.clone(),
+                    open: quote.open,
+                    high: quote.high,
+                    low: quote.low,
+                    volume: quote.volume,
+                    close: quote.close,
+                    adjclose: quote.adjclose,
+                    is_volatile: volatility,
+                };
+                analysis.quotes.push(daily_quote);
 
                 update_min_max_prices(&mut analysis, quote.close, &formatted_date);
             } else {
@@ -55,7 +69,7 @@ impl StockMonitor {
     }
 }
 
-fn calculate_volatility(high: f64, low: f64) -> bool {
+fn determine_volatility(high: f64, low: f64) -> bool {
     (high - low) / low > 0.02
 }
 

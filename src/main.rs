@@ -1,4 +1,8 @@
+mod chart;
+use charming::theme::Theme;
+use charming::HtmlRenderer;
 use clap::Parser;
+use std::path::Path;
 use stockr::StockMonitor;
 
 #[derive(Parser, Debug)]
@@ -14,20 +18,30 @@ async fn main() {
     let monitor = StockMonitor::new(args.symbol);
     match monitor.analyze_stock().await {
         Ok(analysis) => {
-            println!("Date\t\tClosing Price\tVolatile");
-            for (date, price) in analysis.chart_data {
-                let is_volatile = analysis.volatile_days.contains(&date);
+            println!("Date\t\tOpen\tHigh\tLow\tClose\tVolume\t\tAdj_Close\tVolatile");
+            for quote in &analysis.quotes {
                 println!(
-                    "{}\t{:.2}\t\t{}",
-                    date,
-                    price,
-                    if is_volatile { "Yes" } else { "No" }
+                    "{}\t{:.2}\t{:.2}\t{:.2}\t{:.2}\t{}\t{:.2}\t\t{}",
+                    quote.date,
+                    quote.open,
+                    quote.high,
+                    quote.low,
+                    quote.close,
+                    quote.volume,
+                    quote.adjclose,
+                    if quote.is_volatile { "Yes" } else { "No" }
                 );
             }
-
-            println!("\nMinimum closing price: {:.2} on {}", analysis.min_price, analysis.min_date);
-            println!("Maximum closing price: {:.2} on {}", analysis.max_price, analysis.max_date);
-        },
+            let chart = chart::chart_from_analysis(&analysis.quotes, &analysis.min_price);
+            let mut renderer = HtmlRenderer::new("Chart", 1000, 600).theme(Theme::Dark);
+            let file_path = Path::new("stonks.html");
+            match renderer.save(&chart, file_path) {
+                Ok(_) => println!("Chart saved successfully."),
+                Err(e) => {
+                    eprintln!("Error saving chart: {:?}", e);
+                }
+            }
+        }
         Err(e) => eprintln!("Error analyzing stock: {}", e),
     }
 }
