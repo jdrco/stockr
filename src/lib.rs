@@ -1,9 +1,9 @@
-use chrono::{Date, Local, NaiveDateTime, TimeZone};
+use chrono::{NaiveDate, NaiveDateTime};
 use std::error::Error;
 use yahoo_finance_api as yahoo;
 
 pub struct DailyQuote {
-    pub date: Date<Local>,
+    pub date: NaiveDate,
     pub open: f64,
     pub high: f64,
     pub low: f64,
@@ -16,12 +16,40 @@ pub struct DailyQuote {
 pub struct StockAnalysis {
     pub min_price: f64,
     pub max_price: f64,
-    pub min_date: Date<Local>,
-    pub max_date: Date<Local>,
-    pub start_date: Date<Local>,
-    pub end_date: Date<Local>,
+    pub min_date: NaiveDate,
+    pub max_date: NaiveDate,
+    pub start_date: NaiveDate,
+    pub end_date: NaiveDate,
     pub regular_quotes: Vec<DailyQuote>,
     pub volatile_quotes: Vec<DailyQuote>,
+}
+
+impl StockAnalysis {
+    fn log_and_prepare_quotes_for_plot(
+        quotes: &[DailyQuote],
+    ) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
+        println!("Date\t\t\tOpen\tHigh\tLow\tClose");
+        for quote in quotes {
+            println!(
+                "{}\t{:.2}\t{:.2}\t{:.2}\t{:.2}",
+                quote.date, quote.open, quote.high, quote.low, quote.close,
+            );
+        }
+        quotes
+            .iter()
+            .map(|quote| (quote.date, quote.open, quote.high, quote.low, quote.close))
+            .collect()
+    }
+
+    pub fn get_regular_quotes_for_plot(&self) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
+        println!("Regular Quotes");
+        Self::log_and_prepare_quotes_for_plot(&self.regular_quotes)
+    }
+
+    pub fn get_volatile_quotes_for_plot(&self) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
+        println!("Volatile Quotes");
+        Self::log_and_prepare_quotes_for_plot(&self.volatile_quotes)
+    }
 }
 
 pub struct StockMonitor {
@@ -40,23 +68,24 @@ impl StockMonitor {
         let mut analysis = StockAnalysis {
             min_price: std::f64::MAX,
             max_price: std::f64::MIN,
-            min_date: Local::today(),
-            max_date: Local::today(),
-            start_date: Local::today(),
-            end_date: Local::today(),
+            min_date: NaiveDate::from_ymd_opt(1900, 1, 1).unwrap(),
+            max_date: NaiveDate::from_ymd_opt(1900, 1, 1).unwrap(),
+            start_date: NaiveDate::from_ymd_opt(1900, 1, 1).unwrap(),
+            end_date: NaiveDate::from_ymd_opt(1900, 1, 1).unwrap(),
             regular_quotes: Vec::new(),
             volatile_quotes: Vec::new(),
         };
 
         if let Some(first_quote) = quotes.first() {
-            analysis.start_date = timestamp_to_local_date((first_quote.timestamp * 1000).try_into().unwrap());
+            analysis.start_date =
+                timestamp_to_local_date(first_quote.timestamp.try_into().unwrap());
         }
         if let Some(last_quote) = quotes.last() {
-            analysis.end_date = timestamp_to_local_date((last_quote.timestamp * 1000).try_into().unwrap());
+            analysis.end_date = timestamp_to_local_date(last_quote.timestamp.try_into().unwrap());
         }
 
         for quote in quotes {
-            let local_date = timestamp_to_local_date((quote.timestamp * 1000).try_into().unwrap());
+            let local_date = timestamp_to_local_date(quote.timestamp.try_into().unwrap());
 
             let volatility = determine_volatility(quote.high, quote.low);
             let daily_quote = DailyQuote {
@@ -83,16 +112,17 @@ impl StockMonitor {
     }
 }
 
-pub fn timestamp_to_local_date(timestamp_millis: i64) -> Date<Local> {
-    let naive = NaiveDateTime::from_timestamp_opt(timestamp_millis / 1000, 0).expect("Invalid timestamp");
-    Local.from_utc_datetime(&naive).date()
+pub fn timestamp_to_local_date(timestamp: i64) -> NaiveDate {
+    NaiveDateTime::from_timestamp_opt(timestamp, 0)
+        .unwrap()
+        .date()
 }
 
 fn determine_volatility(high: f64, low: f64) -> bool {
     (high - low) / low > 0.02
 }
 
-fn update_min_max_prices(analysis: &mut StockAnalysis, price: f64, date: Date<Local>) {
+fn update_min_max_prices(analysis: &mut StockAnalysis, price: f64, date: NaiveDate) {
     if price < analysis.min_price {
         analysis.min_price = price;
         analysis.min_date = date;
