@@ -36,15 +36,16 @@ async fn main() {
 
             // Get date range
             let (start_date, end_date) = (
-                quotes_to_plot[0].0 + Duration::days(1),
-                quotes_to_plot[quotes_to_plot.len() - 1].0 - Duration::days(1),
+                quotes_to_plot[0].0 - Duration::days(1),
+                quotes_to_plot[quotes_to_plot.len() - 1].0 + Duration::days(1),
             );
             // Basic chart configuration
             let mut chart = ChartBuilder::on(&root)
                 .x_label_area_size(60)
                 .y_label_area_size(60)
+                .margin(60)
                 .caption("Stonks", ("sans-serif", 50.0).into_font())
-                .build_cartesian_2d(start_date..end_date, 0f32..300f32)
+                .build_cartesian_2d(start_date..end_date, 160f32..200f32)
                 .unwrap();
             chart
                 .configure_mesh()
@@ -62,7 +63,7 @@ async fn main() {
                         x.4 as f32,
                         RGBColor(98, 209, 61),
                         RGBColor(209, 61, 61),
-                        10,
+                        5,
                     )
                 }))
                 .unwrap();

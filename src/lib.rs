@@ -32,7 +32,7 @@ impl StockMonitor {
 
     pub async fn analyze_stock(&self) -> Result<StockAnalysis, Box<dyn Error>> {
         let provider = yahoo::YahooConnector::new();
-        let response = provider.get_quote_range(&self.symbol, "1d", "1mo").await?;
+        let response = provider.get_quote_range(&self.symbol, "1d", "6mo").await?;
         let quotes = response.quotes()?;
         let mut analysis = StockAnalysis {
             min_price: std::f64::MAX,
