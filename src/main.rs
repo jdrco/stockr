@@ -2,7 +2,7 @@ mod cli;
 mod plot;
 
 use crate::cli::parse_args;
-use plot::plot_stock_quotes;
+use crate::plot::plot_stock_quotes;
 use stockr::StockMonitor;
 
 #[tokio::main]
