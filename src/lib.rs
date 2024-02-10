@@ -18,7 +18,10 @@ pub struct StockAnalysis {
     pub max_price: f64,
     pub min_date: Date<Local>,
     pub max_date: Date<Local>,
-    pub quotes: Vec<DailyQuote>,
+    pub start_date: Date<Local>,
+    pub end_date: Date<Local>,
+    pub regular_quotes: Vec<DailyQuote>,
+    pub volatile_quotes: Vec<DailyQuote>,
 }
 
 pub struct StockMonitor {
@@ -37,13 +40,23 @@ impl StockMonitor {
         let mut analysis = StockAnalysis {
             min_price: std::f64::MAX,
             max_price: std::f64::MIN,
-            min_date: Local::today(), // Initialize with today's date
-            max_date: Local::today(), // Initialize with today's date
-            quotes: Vec::new(),
+            min_date: Local::today(),
+            max_date: Local::today(),
+            start_date: Local::today(),
+            end_date: Local::today(),
+            regular_quotes: Vec::new(),
+            volatile_quotes: Vec::new(),
         };
 
+        if let Some(first_quote) = quotes.first() {
+            analysis.start_date = timestamp_to_local_date((first_quote.timestamp * 1000).try_into().unwrap());
+        }
+        if let Some(last_quote) = quotes.last() {
+            analysis.end_date = timestamp_to_local_date((last_quote.timestamp * 1000).try_into().unwrap());
+        }
+
         for quote in quotes {
-            let local_date = timestamp_to_local_date((quote.timestamp * 1000).try_into().unwrap()); // Ensure milliseconds are correctly converted
+            let local_date = timestamp_to_local_date((quote.timestamp * 1000).try_into().unwrap());
 
             let volatility = determine_volatility(quote.high, quote.low);
             let daily_quote = DailyQuote {
@@ -56,7 +69,12 @@ impl StockMonitor {
                 adjclose: quote.adjclose,
                 is_volatile: volatility,
             };
-            analysis.quotes.push(daily_quote);
+
+            if volatility {
+                analysis.volatile_quotes.push(daily_quote);
+            } else {
+                analysis.regular_quotes.push(daily_quote);
+            }
 
             update_min_max_prices(&mut analysis, quote.close, local_date);
         }
@@ -66,8 +84,7 @@ impl StockMonitor {
 }
 
 pub fn timestamp_to_local_date(timestamp_millis: i64) -> Date<Local> {
-    let naive =
-        NaiveDateTime::from_timestamp_opt(timestamp_millis / 1000, 0).expect("Invalid timestamp"); // More robust error handling
+    let naive = NaiveDateTime::from_timestamp_opt(timestamp_millis / 1000, 0).expect("Invalid timestamp");
     Local.from_utc_datetime(&naive).date()
 }
 
