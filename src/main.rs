@@ -19,7 +19,7 @@ async fn main() {
             let quotes_to_plot: Vec<(Date<Local>, f64, f64, f64, f64)> = analysis
                 .quotes
                 .into_iter()
-                .map(|quote| (quote.date, quote.open, quote.close, quote.low, quote.high))
+                .map(|quote| (quote.date, quote.open, quote.high, quote.low, quote.close))
                 .collect();
             println!("Date\t\tOpen\tHigh\tLow\tClose");
             for quote in &quotes_to_plot {
@@ -31,7 +31,7 @@ async fn main() {
 
             let dir = "plots-output";
             let filepath = format!("{}/stonks.png", &dir);
-            let root = BitMapBackend::new(&filepath, (1280, 960)).into_drawing_area();
+            let root = BitMapBackend::new(&filepath, (1400, 960)).into_drawing_area();
             root.fill(&WHITE).expect("Error filling background.");
 
             // Get date range
@@ -39,7 +39,6 @@ async fn main() {
                 quotes_to_plot[0].0 + Duration::days(1),
                 quotes_to_plot[quotes_to_plot.len() - 1].0 - Duration::days(1),
             );
-            println!("end: {}, start{}", start_date, end_date);
             // Basic chart configuration
             let mut chart = ChartBuilder::on(&root)
                 .x_label_area_size(60)
@@ -61,8 +60,8 @@ async fn main() {
                         x.2 as f32,
                         x.3 as f32,
                         x.4 as f32,
-                        RGBColor(98, 209, 61).filled(),
-                        RGBColor(209, 61, 61).filled(),
+                        RGBColor(98, 209, 61),
+                        RGBColor(209, 61, 61),
                         10,
                     )
                 }))
