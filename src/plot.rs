@@ -18,11 +18,11 @@ pub fn plot_stock_quotes(
     let end_date = end_date.succ_opt().unwrap() + Duration::days(1);
 
     // Basic chart configuration
-    let mut chart = ChartBuilder::on(&root)
+    let mut chart = ChartBuilder::on(&root) // TODO: Provide a legend to indicate filled points are volatile
         .x_label_area_size(60)
         .y_label_area_size(60)
         .margin(60)
-        .caption("Stock Performance", ("sans-serif", 50).into_font())
+        .caption("Monitoring AAPL", ("sans-serif", 50).into_font()) // TODO: Make the symbol dynamic
         .build_cartesian_2d(start_date..end_date, 160f32..200f32)?; // TODO: Adjust y-axis max/min based on data
 
     chart

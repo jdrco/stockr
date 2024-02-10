@@ -1,8 +1,5 @@
-mod cli;
-mod plot;
-
-use crate::cli::parse_args;
-use crate::plot::plot_stock_quotes;
+use stockr::parse_args;
+use stockr::plot_stock_quotes;
 use stockr::StockMonitor;
 
 #[tokio::main]
@@ -24,6 +21,9 @@ async fn main() {
             ) {
                 eprintln!("Error generating plot: {}", e);
             }
+            println!("Analysis Report:");
+            println!("Min Price: {:.2} on {}", analysis.min_price, analysis.min_date);
+            println!("Max Price: {:.2} on {}", analysis.max_price, analysis.max_date);
         }
         Err(e) => eprintln!("Error analyzing stock: {}", e),
     }
