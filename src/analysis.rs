@@ -15,12 +15,14 @@ pub struct DailyQuote {
 }
 
 pub struct StockAnalysis {
-    pub min_price: f64,
-    pub max_price: f64,
-    pub min_date: NaiveDate,
-    pub max_date: NaiveDate,
+    pub min_close_price: f64,
+    pub max_close_price: f64,
+    pub min_close_date: NaiveDate,
+    pub max_close_date: NaiveDate,
     pub start_date: NaiveDate,
     pub end_date: NaiveDate,
+    pub min_low_price: f64,
+    pub max_high_price: f64,
     pub regular_quotes: Vec<DailyQuote>,
     pub volatile_quotes: Vec<DailyQuote>,
 }
@@ -67,12 +69,14 @@ impl StockMonitor {
         let response = provider.get_quote_range(&self.symbol, "1d", "6mo").await?;
         let quotes = response.quotes()?;
         let mut analysis = StockAnalysis {
-            min_price: std::f64::MAX,
-            max_price: std::f64::MIN,
-            min_date: NaiveDate::from_ymd_opt(1900, 1, 1).unwrap(),
-            max_date: NaiveDate::from_ymd_opt(1900, 1, 1).unwrap(),
+            min_close_price: std::f64::MAX,
+            max_close_price: std::f64::MIN,
+            min_close_date: NaiveDate::from_ymd_opt(1900, 1, 1).unwrap(),
+            max_close_date: NaiveDate::from_ymd_opt(1900, 1, 1).unwrap(),
             start_date: NaiveDate::from_ymd_opt(1900, 1, 1).unwrap(),
             end_date: NaiveDate::from_ymd_opt(1900, 1, 1).unwrap(),
+            min_low_price: std::f64::MAX,
+            max_high_price: std::f64::MIN,
             regular_quotes: Vec::new(),
             volatile_quotes: Vec::new(),
         };
@@ -106,7 +110,7 @@ impl StockMonitor {
                 analysis.regular_quotes.push(daily_quote);
             }
 
-            update_min_max_prices(&mut analysis, quote.close, local_date);
+            update_min_max_prices(&mut analysis, quote, local_date);
         }
 
         Ok(analysis)

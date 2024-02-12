@@ -7,6 +7,8 @@ pub fn plot_stock_quotes(
     volatile_quotes: &Vec<(NaiveDate, f64, f64, f64, f64)>,
     start_date: NaiveDate,
     end_date: NaiveDate,
+    min_low_price: f64, // For dynamic y axis
+    max_high_price: f64,
     dir: &str,
     symbol: &str,
 ) -> Result<(), Box<dyn Error>> {
@@ -32,7 +34,10 @@ pub fn plot_stock_quotes(
             &format!("Monitoring {}", symbol),
             ("sans-serif", 50).into_font(),
         )
-        .build_cartesian_2d(start_date..end_date, 160f32..200f32)?; // TODO: Adjust y-axis max/min based on data
+        .build_cartesian_2d(
+            start_date..end_date,
+            ((min_low_price) as f32)..((max_high_price) as f32),
+        )?;
 
     chart
         .configure_mesh()

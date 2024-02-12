@@ -17,14 +17,22 @@ async fn main() {
                 &vol_quotes_to_plot,
                 analysis.start_date,
                 analysis.end_date,
+                analysis.min_low_price,
+                analysis.max_high_price,
                 "plots-output",
                 &args.symbol,
             ) {
                 eprintln!("Error generating plot: {}", e);
             }
             println!("Analysis Report:");
-            println!("Min Price: {:.2} on {}", analysis.min_price, analysis.min_date);
-            println!("Max Price: {:.2} on {}", analysis.max_price, analysis.max_date);
+            println!(
+                "Min Price: {:.2} on {}",
+                analysis.min_close_price, analysis.min_close_date
+            );
+            println!(
+                "Max Price: {:.2} on {}",
+                analysis.max_close_price, analysis.max_close_date
+            );
         }
         Err(e) => eprintln!("Error analyzing stock: {}", e),
     }
