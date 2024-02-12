@@ -7,6 +7,7 @@ pub fn timestamp_to_local_date(timestamp: i64) -> NaiveDate {
         .date()
 }
 
+// TODO: Make sure this is correct calculation
 pub fn determine_volatility(high: f64, low: f64) -> bool {
     (high - low) / low > 0.02
 }
