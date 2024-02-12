@@ -5,7 +5,7 @@ use stockr::StockMonitor;
 #[tokio::main]
 async fn main() {
     let args = parse_args();
-    let monitor = StockMonitor::new(args.symbol);
+    let monitor = StockMonitor::new(args.symbol.clone());
 
     match monitor.analyze_stock().await {
         Ok(analysis) => {
@@ -18,6 +18,7 @@ async fn main() {
                 analysis.start_date,
                 analysis.end_date,
                 "plots-output",
+                &args.symbol,
             ) {
                 eprintln!("Error generating plot: {}", e);
             }

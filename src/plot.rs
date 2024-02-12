@@ -8,13 +8,15 @@ pub fn plot_stock_quotes(
     start_date: NaiveDate,
     end_date: NaiveDate,
     dir: &str,
+    symbol: &str,
 ) -> Result<(), Box<dyn Error>> {
-    // TODO: provide option to save as png or svg
-    // let filepath = format!("{}/stonks.png", dir);
-    // let root = BitMapBackend::new(&filepath, (1400, 960)).into_drawing_area();
+    let filepath = format!("{}/stock-plot-{}.png", dir, symbol);
+    let root = BitMapBackend::new(&filepath, (1400, 960)).into_drawing_area();
 
-    let filepath = format!("{}/stonks.svg", dir);
-    let root = SVGBackend::new(&filepath, (1400, 960)).into_drawing_area();
+    // TODO: provide option to save as png or svg
+    // let filepath = format!("{}/stonks.svg", dir);
+    // let root = SVGBackend::new(&filepath, (1400, 960)).into_drawing_area();
+
     root.fill(&WHITE)?;
 
     // Adjust the date range to include a margin
@@ -26,7 +28,10 @@ pub fn plot_stock_quotes(
         .x_label_area_size(60)
         .y_label_area_size(60)
         .margin(60)
-        .caption("Monitoring AAPL", ("sans-serif", 50).into_font()) // TODO: Make the symbol dynamic
+        .caption(
+            &format!("Monitoring {}", symbol),
+            ("sans-serif", 50).into_font(),
+        )
         .build_cartesian_2d(start_date..end_date, 160f32..200f32)?; // TODO: Adjust y-axis max/min based on data
 
     chart

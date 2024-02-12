@@ -29,7 +29,7 @@ impl StockAnalysis {
     fn log_and_prepare_quotes_for_plot(
         quotes: &[DailyQuote],
     ) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
-        println!("Date\t\t\tOpen\tHigh\tLow\tClose");
+        println!("Date\t\tOpen\tHigh\tLow\tClose");
         for quote in quotes {
             println!(
                 "{}\t{:.2}\t{:.2}\t{:.2}\t{:.2}",
