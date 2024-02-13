@@ -17,7 +17,11 @@ pub fn plot_stock_quotes(
     // Attempt to create the directory
     match fs::create_dir(&dir) {
         Ok(_) => println!("Directory created successfully."),
-        Err(e) => println!("Error creating directory: {}", e),
+        Err(e) => {
+            if e.kind() != std::io::ErrorKind::AlreadyExists {
+                println!("Error creating directory: {}", e);
+            };
+        }
     }
     
     let filepath = format!("{}/stock-plot-{}.png", dir, symbol);
