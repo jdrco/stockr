@@ -9,5 +9,7 @@ pub struct Args {
 
 pub fn parse_args() -> Args {
     // TODO: need better error handling for breaking inputs
-    Args::parse()
+    let mut args: Args = Args::parse();
+    args.symbol = args.symbol.to_uppercase();
+    args
 }
