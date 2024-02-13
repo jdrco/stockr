@@ -1,1 +1,3 @@
 /target
+plot-outputs/*.png
+plot-outputs/*.svg
