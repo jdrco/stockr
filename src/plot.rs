@@ -1,6 +1,7 @@
 use chrono::{Duration, NaiveDate};
 use plotters::prelude::*;
 use std::error::Error;
+use std::fs;
 
 pub fn plot_stock_quotes(
     regular_quotes: &Vec<(NaiveDate, f64, f64, f64, f64)>,
@@ -12,6 +13,13 @@ pub fn plot_stock_quotes(
     dir: &str,
     symbol: &str,
 ) -> Result<(), Box<dyn Error>> {
+
+    // Attempt to create the directory
+    match fs::create_dir(&dir) {
+        Ok(_) => println!("Directory created successfully."),
+        Err(e) => println!("Error creating directory: {}", e),
+    }
+    
     let filepath = format!("{}/stock-plot-{}.png", dir, symbol);
     let root = BitMapBackend::new(&filepath, (1400, 960)).into_drawing_area();
 
