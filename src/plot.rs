@@ -105,6 +105,7 @@ pub fn plot_stock_quotes(
     chart.configure_series_labels()
         .background_style(&WHITE)
         .border_style(&BLACK)
+        .position(SeriesLabelPosition::UpperRight)
         .draw()?;
 
     root.present()?;
