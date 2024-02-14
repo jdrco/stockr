@@ -7,6 +7,7 @@ async fn main() {
     let args = parse_args();
     let monitor = StockMonitor::new(args.symbol.clone());
 
+    // TODO: Add checks for whether symbol exists
     match monitor.analyze_stock().await {
         Ok(analysis) => {
             let reg_quotes_to_plot = analysis.get_regular_quotes_for_plot();
