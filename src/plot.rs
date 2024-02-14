@@ -38,7 +38,7 @@ pub fn plot_stock_quotes(
     let end_date = end_date.succ_opt().unwrap() + Duration::days(1);
 
     // Basic chart configuration
-    let mut chart = ChartBuilder::on(&root) // TODO: Provide a legend to indicate filled points are volatile
+    let mut chart = ChartBuilder::on(&root) 
         .x_label_area_size(60)
         .y_label_area_size(60)
         .margin(60)
@@ -70,7 +70,15 @@ pub fn plot_stock_quotes(
             RGBColor(209, 61, 61),
             5,
         )
-    }))?;
+    }))?.label("Regular Quotes").legend(|(x, y)| {
+    let (left, right) = (x, x + 20);
+    let (top, bottom) = (y - 2, y + 2); 
+    let fill = Rectangle::new(
+        [(left, top), (right, bottom)], 
+        RGBColor(98, 209, 61).stroke_width(1)
+    );
+    fill
+});
 
     // Drawing volatile quotes
     chart.draw_series(volatile_quotes.iter().map(|x| {
@@ -84,7 +92,20 @@ pub fn plot_stock_quotes(
             RGBColor(209, 61, 61).filled(),
             5,
         )
-    }))?;
+    }))?.label("Volatile Quotes").legend(|(x, y)| {
+    let (left, right) = (x, x + 20);
+    let (top, bottom) = (y - 2, y + 2); 
+    let fill = Rectangle::new(
+        [(left, top), (right, bottom)], 
+        RGBColor(98, 209, 61).filled()
+    );
+    fill
+    });
+
+    chart.configure_series_labels()
+        .background_style(&WHITE)
+        .border_style(&BLACK)
+        .draw()?;
 
     root.present()?;
     println!("Plot has been saved to {}", filepath);
