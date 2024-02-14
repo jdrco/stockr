@@ -1,2 +1,4 @@
 /target
 plots-output/
+.DS_Store
+.vscode/
