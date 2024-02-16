@@ -8,12 +8,10 @@ pub fn timestamp_to_local_date(timestamp: i64) -> NaiveDate {
         .date()
 }
 
-// TODO: Make sure this is correct calculation
 pub fn determine_volatility(high: f64, low: f64) -> bool {
     (high - low) / low > 0.02
 }
 
-// TODO: Make sure this is correct calculation
 pub fn update_min_max_prices(analysis: &mut StockAnalysis, quote: Quote, date: NaiveDate) {
     if quote.low < analysis.min_low_price {
         analysis.min_low_price = quote.low;

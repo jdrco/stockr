@@ -26,11 +26,6 @@ pub fn plot_stock_quotes(
     
     let filepath = format!("{}/stock-plot-{}.png", dir, symbol);
     let root = BitMapBackend::new(&filepath, (1400, 960)).into_drawing_area();
-
-    // TODO: provide option to save as png or svg
-    // let filepath = format!("{}/stonks.svg", dir);
-    // let root = SVGBackend::new(&filepath, (1400, 960)).into_drawing_area();
-
     root.fill(&WHITE)?;
 
     // Adjust the date range to include a margin
