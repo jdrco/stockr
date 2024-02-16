@@ -21,19 +21,25 @@ pub fn parse_args() -> Args {
         let mut input_symbol = String::new();
         loop {
             std::io::stdin().read_line(&mut input_symbol).expect("Failed to read line");
-            let trimmed = input_symbol.trim();
+            let trimmed = input_symbol.trim().to_uppercase();   // Convert  whole symbol to uppercase
 
             if trimmed.eq_ignore_ascii_case("exit") {
                 println!("Exiting program.");
                 std::process::exit(0);
-            } else if !trimmed.is_empty() {
-                return Args::parse_from(vec!["stockr", "--symbol", trimmed]);
-            } else {
-                println!("Invalid input. Please enter a valid symbol or type 'exit' to quit");
-                input_symbol.clear();
+            } 
+            
+            if !trimmed.is_empty() {
+                return Args::parse_from(vec!["stockr", "--symbol", &trimmed]);
             }
+
+            println!("Invalid input. Please enter a valid symbol or type 'exit' to quit");
+            input_symbol.clear();
+
         }
-    } else {
-        Args::parse()
-    }
+    }     
+    
+    // Convert  whole symbol to uppercase
+    let mut args: Args = Args::parse();
+    args.symbol = args.symbol.to_uppercase();
+    args
 }
