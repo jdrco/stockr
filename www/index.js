@@ -1,7 +1,7 @@
 class Chart {}
 
 export function setup(WasmChart) {
-    Chart = WasmChart;
+  Chart = WasmChart;
 }
 
 async function runFetch(symbol) {
@@ -13,5 +13,5 @@ async function runFetch(symbol) {
 }
 
 export async function main() {
-    console.log(await runFetch('AAPL'))
+  await runFetch('AAPL');
 }
