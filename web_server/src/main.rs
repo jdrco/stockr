@@ -131,11 +131,19 @@ async fn analyze_stock(symbol: web::Path<String>) -> Result<impl Responder> {
     }
 }
 
+#[get("/")]
+async fn index() -> Result<NamedFile> {
+    // Specify the path to your index.html file
+    Ok(NamedFile::open("www/index.html")?)
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     use actix_web::{App, HttpServer};
 
-    HttpServer::new(|| App::new().service(analyze_stock))
+    HttpServer::new(|| App::new()
+        .service(analyze_stock)
+        .service(index))
         .bind(("127.0.0.1", 8080))?
         .run()
         .await
