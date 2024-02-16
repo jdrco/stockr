@@ -32,34 +32,6 @@ struct StockAnalysis {
     pub volatile_quotes: Vec<DailyQuote>,
 }
 
-// impl StockAnalysis {
-//     fn log_and_prepare_quotes_for_plot(
-//         quotes: &[DailyQuote],
-//     ) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
-//         println!("Date\t\tOpen\tHigh\tLow\tClose");
-//         for quote in quotes {
-//             println!(
-//                 "{}\t{:.2}\t{:.2}\t{:.2}\t{:.2}",
-//                 quote.date, quote.open, quote.high, quote.low, quote.close,
-//             );
-//         }
-//         quotes
-//             .iter()
-//             .map(|quote| (quote.date, quote.open, quote.high, quote.low, quote.close))
-//             .collect()
-//     }
-
-//     pub fn get_regular_quotes_for_plot(&self) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
-//         println!("Regular Quotes");
-//         Self::log_and_prepare_quotes_for_plot(&self.regular_quotes)
-//     }
-
-//     pub fn get_volatile_quotes_for_plot(&self) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
-//         println!("Volatile Quotes");
-//         Self::log_and_prepare_quotes_for_plot(&self.volatile_quotes)
-//     }
-// }
-
 #[get("/stock/{symbol}")]
 async fn analyze_stock(symbol: web::Path<String>) -> Result<impl Responder> {
     let provider = yahoo::YahooConnector::new();

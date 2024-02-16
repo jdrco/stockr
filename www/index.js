@@ -1,14 +1,17 @@
-// import * as wasm from '../pkg/stockr-wasm';
-import * as wasm from './pkg/stockr_wasm.js';
+class Chart {}
 
-// async function runFetch(symbol) {
-//   try {
-//     return wasm.run(symbol);
-//   } catch (error) {
-//     console.error('Error analyzing stock:', error);
-//   }
-// }
+export function setup(WasmChart) {
+    Chart = WasmChart;
+}
 
-// console.log(runFetch('AAPL'));
+async function runFetch(symbol) {
+  try {
+    return Chart.fetch_stock_data(symbol);
+  } catch (error) {
+    console.error('Error analyzing stock:', error);
+  }
+}
 
-greet();
+export async function main() {
+    console.log(await runFetch('AAPL'))
+}
