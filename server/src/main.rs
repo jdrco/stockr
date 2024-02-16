@@ -1,10 +1,19 @@
 mod utils;
 use crate::utils::{determine_volatility, timestamp_to_local_date, update_min_max_prices};
-use actix_web::{get, web, Responder, Result, HttpResponse};
+use actix_web::{get, web, Responder, Result, HttpResponse, App, HttpServer};
 use actix_files::NamedFile;
 use serde::Serialize;
 use chrono::NaiveDate;
 use yahoo_finance_api as yahoo;
+use actix_files as fs;
+use std::io;
+use std::io::Write;
+use std::sync::Mutex;
+
+struct AppState {
+    user_input: Option<String>,
+}
+
 
 #[derive(Serialize)]
 struct DailyQuote {
@@ -33,7 +42,9 @@ struct StockAnalysis {
 }
 
 #[get("/stock/{symbol}")]
-async fn analyze_stock(symbol: web::Path<String>) -> Result<impl Responder> {
+async fn analyze_stock(data: web::Data<Mutex<AppState>>, symbol: web::Path<String>) -> Result<impl Responder> {
+    let mut app_state = data.lock().unwrap();
+    app_state.user_input = Some(symbol.to_string());
     let provider = yahoo::YahooConnector::new();
     let response = provider.get_quote_range(&symbol, "1d", "6mo").await;
     match response {
@@ -109,14 +120,48 @@ async fn index() -> Result<NamedFile> {
     Ok(NamedFile::open("../www/index.html")?)
 }
 
+#[get("/stock")]
+async fn get_user_input(data: web::Data<Mutex<AppState>>) -> HttpResponse {
+    // Access the application state using the `Data` extractor
+    let app_state = data.lock().unwrap();
+    if let Some(user_input) = &app_state.user_input {
+        HttpResponse::Ok().body(format!("{}", user_input))
+    } else {
+        HttpResponse::BadRequest().body("No user input stored")
+    }
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    use actix_web::{App, HttpServer};
-    use actix_files as fs;
+    print!("Please enter your stock: ");
+    io::stdout().flush().unwrap();
 
-    HttpServer::new(|| {
+    // Create a mutable string to store the user input
+    let mut input = String::new();
+    
+    // Create application state with user input
+    let app_state = 
+        web::Data::new(Mutex::new(AppState {user_input: None}));
+
+    // Read input from the terminal
+    match io::stdin().read_line(&mut input) {
+        Ok(_) => {
+            // If reading succeeds, trim the newline character from the input
+            let name = input.trim().to_uppercase();
+            let mut curr_state = app_state.lock().unwrap();
+            curr_state.user_input = Some(name.to_string());
+        }
+        Err(error) => {
+            // If reading fails, print an error message
+            eprintln!("Error reading input: {}", error);
+        }
+    }
+
+    HttpServer::new(move || {
         App::new()
+            .app_data(app_state.clone())
             .service(analyze_stock)
+            .service(get_user_input)
             .service(fs::Files::new("/pkg", "../pkg").show_files_listing()) // Serve the WASM package
             .service(fs::Files::new("/", "../www").index_file("index.html")) // Serve your static files
     })
