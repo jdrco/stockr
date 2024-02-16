@@ -1,7 +1,7 @@
-mod cli;
 mod utils;
 use crate::utils::{determine_volatility, timestamp_to_local_date, update_min_max_prices};
 use actix_web::{get, web, Responder, Result, HttpResponse};
+use actix_files::NamedFile;
 use serde::Serialize;
 use chrono::NaiveDate;
 use yahoo_finance_api as yahoo;
@@ -32,33 +32,33 @@ struct StockAnalysis {
     pub volatile_quotes: Vec<DailyQuote>,
 }
 
-impl StockAnalysis {
-    fn log_and_prepare_quotes_for_plot(
-        quotes: &[DailyQuote],
-    ) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
-        println!("Date\t\tOpen\tHigh\tLow\tClose");
-        for quote in quotes {
-            println!(
-                "{}\t{:.2}\t{:.2}\t{:.2}\t{:.2}",
-                quote.date, quote.open, quote.high, quote.low, quote.close,
-            );
-        }
-        quotes
-            .iter()
-            .map(|quote| (quote.date, quote.open, quote.high, quote.low, quote.close))
-            .collect()
-    }
+// impl StockAnalysis {
+//     fn log_and_prepare_quotes_for_plot(
+//         quotes: &[DailyQuote],
+//     ) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
+//         println!("Date\t\tOpen\tHigh\tLow\tClose");
+//         for quote in quotes {
+//             println!(
+//                 "{}\t{:.2}\t{:.2}\t{:.2}\t{:.2}",
+//                 quote.date, quote.open, quote.high, quote.low, quote.close,
+//             );
+//         }
+//         quotes
+//             .iter()
+//             .map(|quote| (quote.date, quote.open, quote.high, quote.low, quote.close))
+//             .collect()
+//     }
 
-    pub fn get_regular_quotes_for_plot(&self) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
-        println!("Regular Quotes");
-        Self::log_and_prepare_quotes_for_plot(&self.regular_quotes)
-    }
+//     pub fn get_regular_quotes_for_plot(&self) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
+//         println!("Regular Quotes");
+//         Self::log_and_prepare_quotes_for_plot(&self.regular_quotes)
+//     }
 
-    pub fn get_volatile_quotes_for_plot(&self) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
-        println!("Volatile Quotes");
-        Self::log_and_prepare_quotes_for_plot(&self.volatile_quotes)
-    }
-}
+//     pub fn get_volatile_quotes_for_plot(&self) -> Vec<(NaiveDate, f64, f64, f64, f64)> {
+//         println!("Volatile Quotes");
+//         Self::log_and_prepare_quotes_for_plot(&self.volatile_quotes)
+//     }
+// }
 
 #[get("/stock/{symbol}")]
 async fn analyze_stock(symbol: web::Path<String>) -> Result<impl Responder> {
@@ -131,12 +131,24 @@ async fn analyze_stock(symbol: web::Path<String>) -> Result<impl Responder> {
     }
 }
 
+#[get("/")]
+async fn index() -> Result<NamedFile> {
+    // Specify the path to your index.html file
+    Ok(NamedFile::open("../www/index.html")?)
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     use actix_web::{App, HttpServer};
+    use actix_files as fs;
 
-    HttpServer::new(|| App::new().service(analyze_stock))
-        .bind(("127.0.0.1", 8080))?
-        .run()
-        .await
+    HttpServer::new(|| {
+        App::new()
+            .service(analyze_stock)
+            .service(fs::Files::new("/pkg", "../pkg").show_files_listing()) // Serve the WASM package
+            .service(fs::Files::new("/", "../www").index_file("index.html")) // Serve your static files
+    })
+    .bind("127.0.0.1:8080")?
+    .run()
+    .await
 }
