@@ -1,13 +1,13 @@
 mod utils;
+mod cli;
 use crate::utils::{determine_volatility, timestamp_to_local_date, update_min_max_prices};
 use actix_web::{get, web, Responder, Result, HttpResponse, App, HttpServer};
 use actix_files::NamedFile;
+use cli::parse_args;
 use serde::Serialize;
 use chrono::NaiveDate;
 use yahoo_finance_api as yahoo;
 use actix_files as fs;
-use std::io;
-use std::io::Write;
 use std::sync::Mutex;
 
 struct AppState {
@@ -143,29 +143,16 @@ async fn get_user_input(data: web::Data<Mutex<AppState>>) -> HttpResponse {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    print!("Please enter your stock: ");
-    io::stdout().flush().unwrap();
-
+    
     // Create a mutable string to store the user input
-    let mut input = String::new();
+    let input = parse_args();
     
     // Create application state with user input
     let app_state = 
-        web::Data::new(Mutex::new(AppState {user_input: None}));
-
-    // Read input from the terminal
-    match io::stdin().read_line(&mut input) {
-        Ok(_) => {
-            // If reading succeeds, trim the newline character from the input
-            let name = input.trim().to_uppercase();
-            let mut curr_state = app_state.lock().unwrap();
-            curr_state.user_input = Some(name.to_string());
-        }
-        Err(error) => {
-            // If reading fails, print an error message
-            eprintln!("Error reading input: {}", error);
-        }
-    }
+        web::Data::new(Mutex::new(AppState {user_input: Some(input.symbol.to_string())}));
+    
+    let address = format!("localhost:{}", input.port);
+    println!("Server running on {}", &address);
 
     HttpServer::new(move || {
         App::new()
@@ -175,7 +162,7 @@ async fn main() -> std::io::Result<()> {
             .service(fs::Files::new("/pkg", "../pkg").show_files_listing()) // Serve the WASM package
             .service(fs::Files::new("/", "../www").index_file("index.html")) // Serve your static files
     })
-    .bind("127.0.0.1:8080")?
+    .bind(address)?
     .run()
     .await
 }
