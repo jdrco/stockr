@@ -144,6 +144,15 @@ async fn index() -> Result<NamedFile> {
 async fn main() -> std::io::Result<()> {
     use actix_web::{App, HttpServer};
 
+    let ip = "127.0.0.1";
+    let port = 8080;
+
+    // Format the server address as a string
+    let server_address_string = format!("http://{}:{}/",ip,port);
+
+    // Print the formatted server address
+    println!("Server running on: {}", server_address_string);
+
     HttpServer::new(|| App::new()
         .wrap(
             Cors::default()
@@ -153,7 +162,7 @@ async fn main() -> std::io::Result<()> {
         )
         .service(analyze_stock)
         .service(index))
-        .bind(("127.0.0.1", 8080))?
+        .bind((ip, port))?
         .run()
         .await
 }
