@@ -12,7 +12,16 @@ Contributors:
 - Pratham Sitoula
 - Muhammed Rashid
 
-# Crates Used:
+# Main Crates Used:
+
+//TODO NEED TO COMMMENT THESE CRATES
+plotters-canvas = "0.3.0"
+console_error_panic_hook = { version = "0.1.7", optional = true }
+wasm-bindgen = "0.2.91"
+js-sys = "0.3.68"
+serde = { version = "1.0", features = ["derive"] }
+serde-wasm-bindgen = "0.4"
+wasm-bindgen-futures = "0.4.41"
 
 `chrono`: This crate is used to handle the date and time of the stock quotes.
 
@@ -24,9 +33,21 @@ Contributors:
 
 `plotters`: This crate was used to generate a graph from the processed data points we got from analysis.rs.
 
+`actix-web`: This was used to create the web server and handle all http requests.
+
+`wasm-pack`: This crate was used to compile the rust code as WASM code.
+
+`serde_json`: This crate was used to serialize and deserialize the data returned from get request of the Yahoo stock data.
+
+`yahoo_finance_api`: This crate was used to get the stock data from yahoo finance.
+
+`actix-files`: This crate was used to serve the WASM and html files to the DOM.
+
+`regex` = This crate was used for input checking the user's stock ticker.
+
 # Financial Analysis Algorithm:
 
-We extracted the main analysis into a separate module called `analysis.rs` which contains a custom struct `StockAnalysis` that holds the relevant stock data and the methods to calculate the different metrics.
+We extracted the main analysis into a separate module called `analysis.rs` which contains custom structs `StockAnalysis` and 'DailyQuote' that hold the relevant stock data. We also defined the methods to calculate the different stock metrics and stored them in the analysis.rs module.
 
 ### Min/Max Closing Price Calculations:
 
@@ -49,7 +70,7 @@ pub regular_quotes: Vec<DailyQuote>,
 pub volatile_quotes: Vec<DailyQuote>,
 ```
 
-# Charting Setup:
+# Charting Setup: //TODO UPDATE THIS INFO JARED
 
 We used the `plotters` crate to generate the graph. We used the `BitMapBackend` to create the graph and the `ChartBuilder` to add the different elements to the graph.
 
@@ -63,15 +84,14 @@ To highlight volatile data points, we use a solid colour to fill in the data poi
 
 To ensure that our graph is readable and shows all data points within the current range, we set the range of the x and y-axis. To achieve `autoscaling`, we updated the absolute min and max values (the lowest and highest prices within the range respectively) and used those as the vertical constraints for the y-axis. Similarly for the x-axis, we used the date of the first and last data point (with an offset for side margins) to set the horizontal constraints.
 
-# Project Setup:
+# Project Setup: //TODO JARED UPDATE WITH YOUR KNOWLEDGE
 
 We made sure to *modularize* our code as much as possible. We split off each of the different functionalities into separate modules.
 
-- `main.rs` Contains the main entry point of the application.
+- `main.rs`: Serves as the main entry point of the application. The backend is built using the arctix-web crate. Our backend is specialized around http requests and handles serving the WASM files to the DOM. Furthermore, the server handles the API calls through get requests directly. 
 - `analysis.rs`: Contains all the functionality regarding the creation of the daily plot points and determining its volatility from the data we receive from yahoo api. Serves as the main module for the financial analysis.
 - `cli.rs`: Contains the functionality for command line parsing.
 - `plot.rs`: Contains the logic that creates the graph with the plot points from analysis.rs.
-- `utils.rs`: Contains helper functions.
 - `lib.rs`: Contains the imports that help centralize the connection of all modules.
 
 # Usage Instructions:
@@ -80,4 +100,5 @@ We made sure to *modularize* our code as much as possible. We split off each of 
 2. Run `cargo build` to install all the dependencies.
 3. Use the command `cargo run -- --symbol <SYMBOL>` to generate the plot for a stock symbol.
 4. You can use `cargo run -- --help` for a user input guide.
-5. Check the directory `plots-output`, to find the image of the graph.
+5. The web server will be running by default on http://127.0.0.1:8080/.
+6. To use the application enter a stock ticker into the text input field and click on the 'Analyze' button to update the plot.
