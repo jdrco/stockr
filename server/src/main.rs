@@ -151,7 +151,7 @@ async fn main() -> std::io::Result<()> {
     let app_state = 
         web::Data::new(Mutex::new(AppState {user_input: Some(input.symbol.to_string())}));
     
-    let address = format!("127.0.0.1:{}", input.port);
+    let address = format!("127.0.0.1:{}", input.port.unwrap());
     println!("Server running on http://{}/", &address);
 
     HttpServer::new(move || {

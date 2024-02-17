@@ -8,10 +8,12 @@ pub struct Args {
     #[clap(short, long)]
     pub symbol: String,
 
+    // The port to run the server on
     #[clap(short, long)]
-    pub port: u16,
+    pub port: Option<u16>,
 }
 
+// Functions to validate input
 fn is_alpha(input: &str) -> bool {
     let re = Regex::new(r"^[a-zA-Z]+$").unwrap();
     re.is_match(input)
@@ -74,7 +76,6 @@ pub fn parse_args() -> Args {
 
             println!("Invalid input. Please enter a value for each '<STOCKSYMBOL> <PORTNUMBER>' or type 'exit' to quit");
             input_symbol.clear();
-            
 
         }
     }     
@@ -82,9 +83,14 @@ pub fn parse_args() -> Args {
     // Convert  whole symbol to uppercase
     let mut args: Args = Args::parse();
 
-    if is_valid_symbol(&args.symbol) && is_valid_port(&args.port.to_string()) {
+      // Check if port is None and assign default value
+    if args.port.is_none() {
+        args.port = Some(8080);
+    }
+
+    if is_valid_symbol(&args.symbol) && is_valid_port(&args.port.unwrap().to_string()) {
         args.symbol = args.symbol.to_uppercase();
-        return args;
+        args
     } else {
         println!("Invalid symbol or port number. Please retry running the program. Exiting now!");
         std::process::exit(0);
