@@ -10,11 +10,12 @@ use yahoo_finance_api as yahoo;
 use actix_files as fs;
 use std::sync::Mutex;
 
+// Struct to hold state of stock symbol
 struct AppState {
     user_input: Option<String>,
 }
 
-
+// Struct to hold data for a daily stock quote
 #[derive(Serialize)]
 struct DailyQuote {
     pub date: NaiveDate,
@@ -27,6 +28,7 @@ struct DailyQuote {
     pub is_volatile: bool,
 }
 
+// Struct to hold data for a stock
 #[derive(Serialize)]
 struct StockAnalysis {
     pub min_close_price: f64,
@@ -41,12 +43,18 @@ struct StockAnalysis {
     pub volatile_quotes: Vec<DailyQuote>,
 }
 
+// Function for analyzing and plotting stock data
 #[get("/stock/{symbol}")]
 async fn analyze_stock(data: web::Data<Mutex<AppState>>, symbol: web::Path<String>) -> Result<impl Responder> {
+    // Lock mutex and change data
     let mut app_state = data.lock().unwrap();
     app_state.user_input = Some(symbol.to_string());
+
+    // API call to get stock data from Yahoo Stocks
     let provider = yahoo::YahooConnector::new();
     let response = provider.get_quote_range(&symbol, "1d", "6mo").await;
+
+    // Formatting stock data when stocks are correctly fetched
     match response {
         Ok(response) => {
             let quotes = response.quotes();
@@ -113,13 +121,13 @@ async fn analyze_stock(data: web::Data<Mutex<AppState>>, symbol: web::Path<Strin
                     Ok(HttpResponse::Ok().body(json_string))
                 },
                 Err(err) => {
-                    Ok(HttpResponse::InternalServerError().body(format!("Failed to get quotes: {}", err)))
+                    Ok(HttpResponse::InternalServerError().body(format!("Failed to get quotes: {}", err))) // Error handling
                 }
             }
         
         },
         Err(err) => {
-            Ok(HttpResponse::InternalServerError().body(format!("Failed to get quotes: {}", err)))
+            Ok(HttpResponse::InternalServerError().body(format!("Failed to get quotes: {}", err)))  // Error Handling
         }
     }
 }
