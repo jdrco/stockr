@@ -8,9 +8,9 @@ use wasm_bindgen::prelude::*;
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{Request, RequestInit, RequestMode, Response};
 
-// Define the structure matching the JSON for deserialization
+// Structures for deserializing stock data from JSON.
 #[derive(Serialize, Deserialize, Debug)]
-struct Quote {
+struct DailyQuote {
     date: String,
     open: f64,
     high: f64,
@@ -18,11 +18,12 @@ struct Quote {
     close: f64,
     volume: u64,
     adjclose: f64,
-    is_volatile: Option<bool>,
+    is_volatile: Option<bool>, // Marks if the day was volatile for optional processing
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct MarketData {
+struct StockAnalysis {
+    // Overall stock analysis including price ranges and quotes
     min_close_price: f64,
     max_close_price: f64,
     min_close_date: String,
@@ -31,34 +32,26 @@ struct MarketData {
     end_date: String,
     min_low_price: f64,
     max_high_price: f64,
-    regular_quotes: Vec<Quote>,
-    volatile_quotes: Vec<Quote>,
+    regular_quotes: Vec<DailyQuote>,  // Non-volatile days
+    volatile_quotes: Vec<DailyQuote>, // Volatile days (plotted with different highlight)
 }
 
-#[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
-}
-
-#[wasm_bindgen]
-pub fn greet() {
-    alert("Hello, stockr!");
-}
-
+// Placeholder Chart struct for future expansions
 #[wasm_bindgen]
 pub struct Chart {}
 
 #[wasm_bindgen]
 impl Chart {
+    // Fetches a stock symbol to be used as an example or default
     pub async fn fetch_symbol() -> Result<JsValue, JsValue> {
         let mut opts = RequestInit::new();
         opts.method("GET");
-        opts.mode(RequestMode::Cors);
+        opts.mode(RequestMode::Cors); // Ensures CORS policies are respected
 
         let url = "http://127.0.0.1:8080/stock";
-
         let request = Request::new_with_str_and_init(&url, &opts)?;
 
+        // Asynchronously fetches the symbol from the server
         let window = web_sys::window().expect("no global `window` exists");
         let resp_value = JsFuture::from(window.fetch_with_request(&request)).await?;
 
@@ -75,35 +68,34 @@ impl Chart {
         }
     }
 
+    // Fetches detailed stock data for a given symbol and prepares it for plotting
     pub async fn fetch_stock_data(symbol: String) -> Result<JsValue, JsValue> {
-        let symbol = symbol.to_uppercase();
+        let symbol = symbol.to_uppercase(); // Standardizes symbol format
         let mut opts = RequestInit::new();
         opts.method("GET");
         opts.mode(RequestMode::Cors);
 
+        // Constructs the request URL with the symbol
         let url = format!("http://127.0.0.1:8080/stock/{}", symbol);
-
         let request = Request::new_with_str_and_init(&url, &opts)?;
-
         let window = web_sys::window().unwrap();
         let resp_value = JsFuture::from(window.fetch_with_request(&request)).await?;
 
         assert!(resp_value.is_instance_of::<Response>());
         let resp: Response = resp_value.dyn_into().unwrap();
-
         let json = JsFuture::from(resp.json()?).await?;
 
-        // Deserialize
-        let market_data: MarketData =
+        // Deserialize JSON into Rust structures for further processing
+        let market_data: StockAnalysis =
             from_value(json.clone()).map_err(|e| JsValue::from_str(&e.to_string()))?;
 
-        // Convert dates from String to NaiveDate
+        // Convert date strings to `NaiveDate` for internal use
         let start_date = NaiveDate::parse_from_str(&market_data.start_date, "%Y-%m-%d")
             .map_err(|e| JsValue::from_str(&e.to_string()))?;
         let end_date = NaiveDate::parse_from_str(&market_data.end_date, "%Y-%m-%d")
             .map_err(|e| JsValue::from_str(&e.to_string()))?;
 
-        // Convert quotes to the specified tuple format
+        // Prepares data for plotting and calls the plot function
         let regular_quotes: Vec<(NaiveDate, f64, f64, f64, f64)> = market_data
             .regular_quotes
             .iter()

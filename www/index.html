@@ -8,10 +8,10 @@
       body {
         display: flex;
         justify-content: center;
-        /* align-items: center; */
         height: 100vh;
         width: 100vw;
         font-family: Arial, sans-serif;
+        background-color: rgb(47 50 61);
       }
       main {
         text-align: center;
@@ -19,24 +19,55 @@
       .error {
         color: red;
       }
-      #symbolInput {
-        font-size: medium;
+      #canvas {
+        border-radius: 15px;
+        box-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+      #stockForm div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      #stockForm label,
+      #stockForm input,
+      #stockForm button {
+        font-size: 16px;
+      }
+      #stockForm input,
+      #stockForm button {
+        height: 32px;
+        padding-left: 10px;
+        padding-right: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      #stockForm button {
+        cursor: pointer;
+        background-color: #4c9eaf;
+        color: white;
+        border: none;
+      }
+      #stockForm button:hover {
+        background-color: #306c78;
       }
     </style>
   </head>
   <body>
     <script src="./bootstrap.js"></script>
     <main>
-      <canvas id="canvas" width="1400" height="900"></canvas>
+      <canvas id="canvas" width="1600" height="800"></canvas>
       <form id="stockForm">
         <div>
-          <label for="symbolInput">Stock Symbol:</label>
-          <input type="text" id="symbolInput" name="symbol" />
+          <input placeholder="Symbol" ="text" id="symbolInput" name="symbol" />
           <button type="submit">Analyze</button>
         </div>
-        <span id="errorText" style="color: red; display: none"
-          >* Please input a valid stock symbol *</span
-        >
+        <br />
+        <span id="errorText" class="error" style="display: none">
+          * Please input a valid stock symbol *
+        </span>
       </form>
     </main>
   </body>
