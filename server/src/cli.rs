@@ -81,6 +81,12 @@ pub fn parse_args() -> Args {
     
     // Convert  whole symbol to uppercase
     let mut args: Args = Args::parse();
-    args.symbol = args.symbol.to_uppercase();
-    args
+
+    if is_valid_symbol(&args.symbol) && is_valid_port(&args.port.to_string()) {
+        args.symbol = args.symbol.to_uppercase();
+        return args;
+    } else {
+        println!("Invalid symbol or port number. Please retry running the program. Exiting now!");
+        std::process::exit(0);
+    }
 }
