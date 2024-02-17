@@ -1,4 +1,9 @@
-/target
+target/
 plots-output/
 .DS_Store
 .vscode/
+**/*.rs.bk
+Cargo.lock
+bin/
+pkg/
+wasm-pack.log
