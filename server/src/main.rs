@@ -1,47 +1,13 @@
 mod utils;
 mod cli;
-use crate::utils::{determine_volatility, timestamp_to_local_date, update_min_max_prices};
+use crate::utils::{determine_volatility, timestamp_to_local_date, update_min_max_prices, AppState, StockAnalysis, DailyQuote};
 use actix_web::{get, web, Responder, Result, HttpResponse, App, HttpServer};
 use actix_files::NamedFile;
 use cli::parse_args;
-use serde::Serialize;
 use chrono::NaiveDate;
 use yahoo_finance_api as yahoo;
 use actix_files as fs;
 use std::sync::Mutex;
-
-// Struct to hold state of stock symbol
-struct AppState {
-    user_input: Option<String>,
-}
-
-// Struct to hold data for a daily stock quote
-#[derive(Serialize)]
-struct DailyQuote {
-    pub date: NaiveDate,
-    pub open: f64,
-    pub high: f64,
-    pub low: f64,
-    pub volume: u64,
-    pub close: f64,
-    pub adjclose: f64,
-    pub is_volatile: bool,
-}
-
-// Struct to hold data for a stock
-#[derive(Serialize)]
-struct StockAnalysis {
-    pub min_close_price: f64,
-    pub max_close_price: f64,
-    pub min_close_date: NaiveDate,
-    pub max_close_date: NaiveDate,
-    pub start_date: NaiveDate,
-    pub end_date: NaiveDate,
-    pub min_low_price: f64,
-    pub max_high_price: f64,
-    pub regular_quotes: Vec<DailyQuote>,
-    pub volatile_quotes: Vec<DailyQuote>,
-}
 
 // Function for analyzing and plotting stock data
 #[get("/stock/{symbol}")]
