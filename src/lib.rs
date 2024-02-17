@@ -1,5 +1,3 @@
-mod utils;
-
 mod plot;
 
 use crate::plot::plot_stock_quotes;
@@ -52,7 +50,33 @@ pub struct Chart {}
 
 #[wasm_bindgen]
 impl Chart {
+    pub async fn fetch_symbol() -> Result<JsValue, JsValue> {
+        let mut opts = RequestInit::new();
+        opts.method("GET");
+        opts.mode(RequestMode::Cors);
+
+        let url = "http://127.0.0.1:8080/stock";
+
+        let request = Request::new_with_str_and_init(&url, &opts)?;
+
+        let window = web_sys::window().expect("no global `window` exists");
+        let resp_value = JsFuture::from(window.fetch_with_request(&request)).await?;
+
+        assert!(resp_value.is_instance_of::<Response>());
+        let resp: Response = resp_value
+            .dyn_into()
+            .expect("response should be of `Response` type");
+
+        if resp.ok() {
+            let text = JsFuture::from(resp.text()?).await?;
+            Ok(text)
+        } else {
+            Err(JsValue::from_str("Failed to fetch user input"))
+        }
+    }
+
     pub async fn fetch_stock_data(symbol: String) -> Result<JsValue, JsValue> {
+        let symbol = symbol.to_uppercase();
         let mut opts = RequestInit::new();
         opts.method("GET");
         opts.mode(RequestMode::Cors);
@@ -116,7 +140,7 @@ impl Chart {
             end_date,
             market_data.min_low_price.clone(),
             market_data.max_high_price.clone(),
-            "AAPL",
+            &symbol,
         ) {
             eprintln!("Error generating plot: {}", e);
         }
