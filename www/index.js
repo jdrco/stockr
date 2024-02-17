@@ -6,31 +6,38 @@ export function setup(WasmChart) {
 
 async function runFetchStockData(symbol) {
   try {
-    return Chart.fetch_stock_data(symbol);
+    const result = await Chart.fetch_stock_data(symbol);
+    document.getElementById('errorText').style.display = 'none';
+    return result;
   } catch (error) {
     console.error('Error analyzing stock:', error);
+    document.getElementById('errorText').style.display = 'inline';
+    document.getElementById('errorText').style.display = 'inline';
+    return null;
   }
 }
 
 async function initializeSymbolInput() {
+  let symbol = null;
   try {
-    const symbol = await Chart.fetch_symbol(); 
-    console.log(symbol)
-    if (symbol) {
-      document.getElementById('symbolInput').value = symbol;
-      await runFetchStockData(symbol);
-    }
+    symbol = await Chart.fetch_symbol();
   } catch (error) {
     console.error('Error fetching initial symbol:', error);
+  }
+  if (symbol) {
+    document.getElementById('symbolInput').value = symbol;
+    await runFetchStockData(symbol);
   }
 }
 
 export async function main() {
-  document.getElementById('stockForm').addEventListener('submit', async function(event) {
-    event.preventDefault();
-    const symbol = document.getElementById('symbolInput').value;
-    await runFetchStockData(symbol);
-  });
+  document
+    .getElementById('stockForm')
+    .addEventListener('submit', async function (event) {
+      event.preventDefault();
+      const symbol = document.getElementById('symbolInput').value;
+      await runFetchStockData(symbol);
+    });
 
   await initializeSymbolInput();
 }

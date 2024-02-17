@@ -32,7 +32,7 @@ pub fn plot_stock_quotes(
         .y_label_area_size(60)
         .margin(60)
         .caption(
-            &format!("Monitoring {}", symbol),
+            &format!("Monitoring {} (Past 6 Months)", symbol),
             ("sans-serif", 50).into_font(),
         )
         .build_cartesian_2d(
@@ -61,13 +61,13 @@ pub fn plot_stock_quotes(
                 5,
             )
         }))?
-        .label("Regular Quotes")
+        .label("Empty Candlestick: Regular Quotes")
         .legend(|(x, y)| {
             let (left, right) = (x, x + 20);
-            let (top, bottom) = (y - 2, y + 2);
+            let (top, bottom) = (y - 3, y + 3);
             let fill = Rectangle::new(
                 [(left, top), (right, bottom)],
-                RGBColor(98, 209, 61).stroke_width(1),
+                RGBColor(0, 0, 0).stroke_width(1),
             );
             fill
         });
@@ -86,14 +86,11 @@ pub fn plot_stock_quotes(
                 5,
             )
         }))?
-        .label("Volatile Quotes")
+        .label("Filled Candlestick: Volatile Quotes")
         .legend(|(x, y)| {
             let (left, right) = (x, x + 20);
-            let (top, bottom) = (y - 2, y + 2);
-            let fill = Rectangle::new(
-                [(left, top), (right, bottom)],
-                RGBColor(98, 209, 61).filled(),
-            );
+            let (top, bottom) = (y - 3, y + 3);
+            let fill = Rectangle::new([(left, top), (right, bottom)], RGBColor(0, 0, 0).filled());
             fill
         });
 
