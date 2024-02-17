@@ -14,6 +14,15 @@ Contributors:
 
 # Main Crates Used:
 
+//TODO NEED TO COMMMENT THESE CRATES
+plotters-canvas = "0.3.0"
+console_error_panic_hook = { version = "0.1.7", optional = true }
+wasm-bindgen = "0.2.91"
+js-sys = "0.3.68"
+serde = { version = "1.0", features = ["derive"] }
+serde-wasm-bindgen = "0.4"
+wasm-bindgen-futures = "0.4.41"
+
 `chrono`: This crate is used to handle the date and time of the stock quotes.
 
 `clap`: This crate is used to parse the command line arguments.
@@ -24,11 +33,17 @@ Contributors:
 
 `plotters`: This crate was used to generate a graph from the processed data points we got from analysis.rs.
 
-`actix`: This was used to create the web server and handle all http requests.
+`actix-web`: This was used to create the web server and handle all http requests.
 
 `wasm-pack`: This crate was used to compile the rust code as WASM code.
 
-`serde`: This crate was used to serialize and deserialize the data returned from the Yahoo API call.
+`serde_json`: This crate was used to serialize and deserialize the data returned from get request of the Yahoo stock data.
+
+`yahoo_finance_api`: This crate was used to get the stock data from yahoo finance.
+
+`actix-files`: This crate was used to serve the WASM and html files to the DOM.
+
+`regex` = This crate was used for input checking the user's stock ticker.
 
 # Financial Analysis Algorithm:
 
@@ -73,10 +88,10 @@ To ensure that our graph is readable and shows all data points within the curren
 
 We made sure to *modularize* our code as much as possible. We split off each of the different functionalities into separate modules.
 
-- `main.rs` Contains the main entry point of the application. It is hosts a server that handles the API calls and web page.
+- `main.rs`: Serves as the main entry point of the application. The backend is built using the arctix-web crate. Our backend is specialized around http requests and handles serving the WASM files to the DOM. Furthermore, the server handles the API calls through get requests directly. 
 - `analysis.rs`: Contains all the functionality regarding the creation of the daily plot points and determining its volatility from the data we receive from yahoo api. Serves as the main module for the financial analysis.
 - `cli.rs`: Contains the functionality for command line parsing.
-- `plot.rs`: Contains the logic that creates the graph with the plot points from analysis.rs..
+- `plot.rs`: Contains the logic that creates the graph with the plot points from analysis.rs.
 - `lib.rs`: Contains the imports that help centralize the connection of all modules.
 
 # Usage Instructions:
