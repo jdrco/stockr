@@ -45,6 +45,7 @@ fn is_valid_port(port: &str) -> bool {
     false
 }
 
+// parse_args function for collecting and validating inputs
 pub fn parse_args() -> Args {
     let args: Vec<String> = env::args().collect();
     let symbol_arg_present = args.iter().any(|arg| arg == "--symbol");
@@ -55,7 +56,8 @@ pub fn parse_args() -> Args {
         USAGE: cargo run -- --symbol <STOCKSYMBOL> --port <PORTNUMBER>\n
         or use '--help' for extra info");
         println!("Please Enter '<STOCKSYMBOL> <PORTNUMBER>' or 'exit' to end program: ");
-
+        
+        // Loop through until correct input obtained or user exits
         let mut input_symbol = String::new();
         loop {
             std::io::stdin().read_line(&mut input_symbol).expect("Failed to read line");
@@ -83,11 +85,12 @@ pub fn parse_args() -> Args {
     // Convert  whole symbol to uppercase
     let mut args: Args = Args::parse();
 
-      // Check if port is None and assign default value
+    // Check if port is None and assign default value
     if args.port.is_none() {
         args.port = Some(8080);
     }
-
+    
+    // Extra Validation but should not trigger because of CLAP
     if is_valid_symbol(&args.symbol) && is_valid_port(&args.port.unwrap().to_string()) {
         args.symbol = args.symbol.to_uppercase();
         args
