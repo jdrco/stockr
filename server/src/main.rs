@@ -97,7 +97,7 @@ async fn analyze_stock(data: web::Data<Mutex<AppState>>, symbol: web::Path<Strin
                         update_min_max_prices(&mut analysis, quote, local_date);
                     }
 
-                    println!("Analysis Report:");
+                    println!("Analysis Report: {}", app_state.user_input.as_ref().unwrap());
                     println!(
                         "Min Price: {:.2} on {}",
                         analysis.min_close_price, analysis.min_close_date
