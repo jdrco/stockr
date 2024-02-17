@@ -1,6 +1,6 @@
-mod utils;
+mod analysis;
 mod cli;
-use crate::utils::{determine_volatility, timestamp_to_local_date, update_min_max_prices, AppState, StockAnalysis, DailyQuote};
+use crate::analysis::{determine_volatility, timestamp_to_local_date, update_min_max_prices, AppState, StockAnalysis, DailyQuote};
 use actix_web::{get, web, Responder, Result, HttpResponse, App, HttpServer};
 use actix_files::NamedFile;
 use cli::parse_args;
