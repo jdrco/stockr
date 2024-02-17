@@ -1,16 +1,16 @@
-<p align="center">
-    <img width="700" alt="image" src="https://github.com/jdrco/stockr/assets/83478026/80f48c7d-1a44-419c-838a-52222d30ef3b">
-</p>
+
 
 # stockr
 
-A Stock Market Monitor.
+A WebAssembly-based stock market monitoring tool developed in Rust.
 
-Contributors:
-- Jared Drueco
-- Antonio Martin-O
-- Pratham Sitoula
-- Muhammed Rashid
+# Demo
+
+<p align="center">
+    
+
+https://github.com/jdrco/stockr/assets/83478026/1b0caaac-6f03-4b01-bd3b-d79415ff3b55
+</p>
 
 # Crates Used:
 
